@@ -1,4 +1,4 @@
-name: Daily yahoo Stock News
+name: Daily yahoo Stock News gitgit
 
 # 1. いつ実行するかを決める設定
 on:
