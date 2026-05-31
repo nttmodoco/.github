@@ -5,7 +5,7 @@ on:
   schedule:
     # 毎日日本時間の18時に変更　朝8:00に実行（UTC時間では前日の23:00）
     - cron: '0 09 * * *'
-  　workflow_dispatch: # これを入れておくと、ボタンを押して手動でいつでもテスト実行できます
+  workflow_dispatch: # これを入れておくと、ボタンを押して手動でいつでもテスト実行できます
 
 jobs:
   run-python-script:
