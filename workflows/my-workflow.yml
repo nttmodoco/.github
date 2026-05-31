@@ -3,8 +3,8 @@ name: Daily Stock News to Notion
 # 1. いつ実行するかを決める設定
 on:
   schedule:
-    # 毎日日本時間の朝8:00に実行（UTC時間では前日の23:00）
-    - cron: '0 23 * * *'
+    # 毎日日本時間の18時に変更　朝8:00に実行（UTC時間では前日の23:00）
+    - cron: '0 09 * * *'
   workflow_dispatch: # これを入れておくと、ボタンを押して手動でいつでもテスト実行できます
 
 jobs:
@@ -33,4 +33,4 @@ jobs:
         NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
         DATABASE_ID: ${{ secrets.DATABASE_ID }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      run: python main.py  # あなたのメインのPythonファイル名に変えてください
+      run: yahoo_latest_news.py  # あなたのメインのPythonファイル名に変えてください
