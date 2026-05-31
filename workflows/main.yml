@@ -3,7 +3,7 @@ name: Daily Yahoo Stock NewsMain
 # 1. いつ実行するかを決める設定
 on:
   schedule:
-    - cron: '0 09 * * *'
+    - cron: '0 13 * * *'
   workflow_dispatch: # これを入れておくと、ボタンを押して手動でいつでもテスト実行できます
 
 jobs:
