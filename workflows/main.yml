@@ -1,4 +1,4 @@
-name: Daily Yahoo Stock NewsMain
+name: Daily Yahoo Stock News workflows
 
 # 1. いつ実行するかを決める設定
 on:
