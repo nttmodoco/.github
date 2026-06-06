@@ -34,3 +34,7 @@ jobs:
         DATABASE_ID: ${{ secrets.DATABASE_ID }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: python kabutan_news_simple.py  # あなたのメインのPythonファイル名に変えてください
+
+    # 2つ目のプログラム（テスト用）を実行（★ここを追加！）
+    - name: Run Git Test Script
+      run: python GitTest.py
