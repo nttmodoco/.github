@@ -1,7 +1,3 @@
-"""
-シンプル版：株探ニュース取得（ワンタイムスクレイピング用）
-定期実行が不要な場合や、テスト目的で使用してください。
-"""
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,46 +6,52 @@ import json
 from datetime import datetime
 
 BASE_URL = "https://kabutan.jp/news/marketnews/"
+
+# 🌟 海外サーバーからの拒否を減らすため、ヘッダー情報を本物のブラウザに近づけて強化
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'ja,en-US;q=0.7,en;q=0.3',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
 }
 
 def get_articles_list():
     """記事一覧を取得"""
     try:
-        response = requests.get(BASE_URL, headers=HEADERS, timeout=10)
+        response = requests.get(BASE_URL, headers=HEADERS, timeout=15) # タイムアウトを少し長めに
         response.encoding = 'utf-8'
         
+        # もし拒否されたら、エラーを発生させてGitHubのログに理由を残す
         if response.status_code != 200:
-            print(f"エラー: ステータスコード {response.status_code}")
-            return []
+            raise Exception(f"サイトへのアクセスが拒否されました (ステータスコード: {response.status_code})")
         
         soup = BeautifulSoup(response.content, 'html.parser')
         articles = []
         
-        # ★ ここを株探の実際のHTMLに合わせて調整してください ★
-        # 開発者ツール(F12)で記事タイトルを検査して、正しいセレクタを確認
-        
-        # 方法1: class属性で検索
+        # 株探の現在のHTML構造に合わせたセレクタ（s_news_list）
         news_table = soup.find('table', class_='s_news_list mgbt0')
         if news_table:
             article_links = news_table.find_all('a')
         else:
             article_links = []
         
-        # 方法2: 特定のdiv内のすべてのaタグ
         if not article_links:
             news_container = soup.find('div', class_='news-list')
             if news_container:
                 article_links = news_container.find_all('a')
         
-        print(f"見つかった記事: {len(article_links)}件")
+        print(f"見つかった記事リンク: {len(article_links)}件")
         
         for link in article_links[:5]:  # 最新5件
             title = link.get_text(strip=True)
             href = link.get('href', '')
             url = urljoin(BASE_URL, href)
             
+            # リンクテキストが空、またはJavaScriptのリンクは除外
+            if not title or href.startswith('javascript:'):
+                continue
+                
             articles.append({
                 'title': title,
                 'url': url,
@@ -59,54 +61,51 @@ def get_articles_list():
         return articles
     
     except Exception as e:
-        print(f"エラー: {str(e)}")
-        return []
+        print(f"記事一覧取得エラー: {str(e)}")
+        raise e # エラーを上に投げて、Actionsを確実に失敗させてログを見やすくする
 
 def get_article_body(url):
     """記事の本体テキストを取得"""
     try:
-        response = requests.get(url, headers=HEADERS, timeout=10)
+        response = requests.get(url, headers=HEADERS, timeout=15)
         response.encoding = 'utf-8'
         
+        if response.status_code != 200:
+            return "本文取得失敗（アクセス拒否）"
+            
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # ★ 記事本体のセレクタを調整 ★
-        # 開発者ツールで本文の構造を確認してください
-        
-        # よくあるセレクタ例
         body = (soup.find('div', class_='article-body') or
                 soup.find('article') or
                 soup.find('div', class_='main-content'))
         
         if body:
             text = body.get_text(strip=True)
-            return text[:1000]  # 最初の1000文字
+            return text[:1000]
         
-        return "本体取得失敗"
+        return "本文の枠組み（セレクタ）が見つかりません"
     
     except Exception as e:
-        print(f"記事取得エラー: {str(e)}")
+        print(f"記事詳細取得エラー: {str(e)}")
         return None
 
 def main():
     """メイン処理"""
     print("株探ニュース取得中...\n")
     
-    # 記事一覧を取得
     articles = get_articles_list()
     
     if not articles:
-        print("記事を取得できませんでした")
+        print("有効な記事が1件も見つかりませんでした。")
         return
     
-    # 各記事の本体を取得
     for i, article in enumerate(articles, 1):
         print(f"\n【{i}】 {article['title']}")
         print(f"URL: {article['url']}")
         
         body = get_article_body(article['url'])
         if body:
-            print(f"本体: {body[:200]}...\n")
+            print(f"本体: {body[:100]}...\n")
             article['body'] = body
     
     # JSONファイルに保存
