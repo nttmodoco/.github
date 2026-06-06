@@ -39,10 +39,10 @@ jobs:
     - name: Run Git Test Script
       run: python GitTest.py
       
-　　# 🌟 ここから追加：新しくできたファイルをGitHubリポジトリに保存する
+    # 追加
     - name: Commit and Push changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add test_result.json  # ※もし株探のJSONも残したい場合は「git add .」にすれば全て保存されます
+        git add test_result.json  # もし株探のJSONも残したい場合は「git add .」にすれば全て保存されます
         git diff --cached --quiet || (git commit -m "Auto-update json data" && git push)
