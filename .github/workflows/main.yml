@@ -45,4 +45,5 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add test_result.json  # もし株探のJSONも残したい場合は「git add .」にすれば全て保存されます
+        git add articles_simple.json
         git diff --cached --quiet || (git commit -m "Auto-update json data" && git push)
